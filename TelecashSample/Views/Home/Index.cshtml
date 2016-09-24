@@ -1,0 +1,159 @@
+﻿@using TelecashSample.Models
+@model TelecashSample.Models.Customer
+
+@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="container">
+    <div class="row">
+
+        <div class="col-xs-12 col-md-7">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Products and prices</h3>
+                </div>
+                <div class="panel-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Unit Price</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (Product p in Model.Products)
+                            {
+                                <tr>
+                                    <td>@p.Name </td>
+                                    <td>@p.Price</td>
+                                    <td>@p.Quantity</td>
+                                    <td>@p.Total</td>
+                                </tr>
+                            }
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td><strong>Total</strong></td>
+                                <td><strong>@Model.Total</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div Class="col-xs-12 col-md-4">
+            <div id="creditCard" class="tab-pane fade in active">
+                <div Class="panel panel-default">
+                    <div Class="panel-heading">
+                        <h3 Class="panel-title">Payment details<img src="~/Images/cards.png" style="margin-left:30px; width:150px"></h3>
+                    </div>
+                    <div class="panel-body">
+                        <form autocomplete="off" role="form" id="payment-form" method="post" action="https://test.ipg-online.com/connect/gateway/processing">
+                            <input type="hidden" name="txntype" value="sale">
+                            <input type="hidden" name="timezone" value="GMT" />
+                            <input type="hidden" name="txndatetime" value="@Model.TransactionTime"/>
+                            <input type="hidden" name="hash_algorithm" value="SHA1" />
+                            <input type="hidden" name="hash" value="@Model.Hash"/>
+                            <input type="hidden" name="storename" value="@Store.STORE_NAME" />
+                            <input type="hidden" name="mode" value="payonly" />
+                            <input type="hidden" name="chargetotal" value="@Model.Total" />
+                            <input type="hidden" name="currency" value="@Store.CURRENCY" />
+                            <input type="hidden" name="full_bypass" value="true" />
+                            
+                            @*
+                                It is possible to use customized error/success pages,
+                                but to do so, you will need to publish your project
+                                online to receive TeleCash response.
+                                This project has as examples the views PaymentFailure and PaymentSuccess *@
+                            @*<input type="hidden" name="responseFailURL" value="@Url.Action("PaymentFailure", null, null, Request.Url.Scheme)" />
+                              <input type="hidden" name="responseSuccessURL" value="@Url.Action("PaymentSuccess", null, null, Request.Url.Scheme)" />*@
+                            <input type="hidden" name="responseFailURL" value="http://www.error.com/" />
+                            <input type="hidden" name="responseSuccessURL" value="http://www.success.com/" />
+                            
+                            @*This are additional and optional fields that you may send.
+                                It is possible to create new filds to send specific information from
+                                your store, product or client. You can change the helper model TelecashResponse 
+                                and Add a variable with the same name to receive it back.*@
+                            <input type="hidden" name="customerid" value="@Model.Id" />
+                            <input type="hidden" name="myCustomerName" value="@Model.Name" />
+
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <div class="form-group">
+                                        <label for="cardNumber">Card</label>
+                                        <div class="input-group-sm">
+                                            <select id="paymentMethod" name="paymentMethod" class="form-control input-sm input-sm">
+                                                <option value="V">Visa</option>
+                                                <option value="M">MasterCard</option>
+                                                <option value="A">American Express</option>
+                                                <option value="C">Diners/Discover</option>
+                                                <option value="J">JCB</option>
+                                                <option value="CUP">UnionPay</option>
+                                                <option value="MA">Maestro</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <div class="form-group">
+                                        <label for="cardNumber">Card Number</label>
+                                        <div class="input-group-sm">
+                                            <input type="text" class="form-control input-sm" name="cardnumber" id="cardnumber" placeholder="Card Number" required autofocus data-stripe="number" value="" />
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <div class="form-group">
+                                        <label for="nameOnCard">Name on card</label>
+                                        <div class="input-group-sm">
+                                            <input type="text" class="form-control input-sm" name="bname" id="bname" placeholder="Name on card" required value="" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-7 col-md-7">
+                                    <div class="form-group-sm">
+                                        <div class="col-xs-6 col-lg-6 pl-ziro">
+                                            <label for="expmonth">Exp. Month</label>
+                                            <input type="text" class="form-control input-sm" name="expmonth" id="expmonth" placeholder="MM" required data-stripe="exp_month" value="" />
+                                        </div>
+                                        <div class="col-xs-6 col-lg-6 pl-ziro">
+                                            <label for="expyear">Exp. Year</label>
+                                            <input type="text" class="form-control input-sm" name="expyear" id="expyear" placeholder="YYYY" required data-stripe="exp_year" value="" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-3 col-md-3">
+                                    <div class="form-group">
+                                        <label for="cvCode">CV Code</label>
+                                        <input type="password" class="form-control input-sm" name="cvm" id="cvm" placeholder="CV" required data-stripe="cv" value="" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <div class="form-group">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-xs-12">
+                                    <button class="btn btn-success btn-lg btn-block" type="submit">Submit Payment</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
